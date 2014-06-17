@@ -4,6 +4,8 @@ from __future__ import absolute_import, division, print_function
 Say 'yes' to types but 'no' to typing!
 """
 
+import textwrap
+
 
 __version__ = "0.2.0dev"
 __author__ = "Hynek Schlawack"
@@ -115,17 +117,19 @@ def with_init(attrs, defaults=None):
     if defaults is None:
         defaults = {}
 
-    def init(self, *args, **kw):
-        for a in attrs:
-            try:
-                v = kw.pop(a)
-            except KeyError:
-                try:
-                    v = defaults[a]
-                except KeyError:
-                    raise ValueError("Missing value for '{0}'.".format(a))
-            setattr(self, a, v)
-        self.__original_init__(*args, **kw)
+    source = textwrap.dedent("""
+    def init(self, {args_with_defaults}):
+        {assignments}
+        self.__original_init__({args})
+    """.format(
+        args_with_defaults=", ".join("{attr}=defaults[{attr}]".format(attr=attr) if attr in defaults else "attr" for attr in attrs),
+        args=", ".join(attrs),
+        assignments="\n    ".join("self.{attr} = {attr}".format(attr=attr) for attr in attrs)
+    ))
+    ns = {"defaults": defaults}
+    locs = {}
+    exec(source, ns, locs)
+    init = locs["init"]
 
     def wrap(cl):
         cl.__original_init__ = cl.__init__
