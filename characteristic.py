@@ -103,6 +103,14 @@ def with_repr(attrs):
     return wrap
 
 
+def _make_wrap_init(init):
+    def wrap(cl):
+        cl.__original_init__ = cl.__init__
+        cl.__init__ = init
+        return cl
+    return wrap
+
+
 def with_init(attrs, defaults=None):
     """
     A class decorator that wraps the __init__ method of a class and sets
@@ -130,13 +138,7 @@ def init(self, {args_with_defaults}):
     locs = {}
     exec(source, ns, locs)
     init = locs["init"]
-
-    def wrap(cl):
-        cl.__original_init__ = cl.__init__
-        cl.__init__ = init
-        return cl
-
-    return wrap
+    return _make_wrap_init(init)
 
 
 def attributes(attrs, defaults=None, create_init=True):
