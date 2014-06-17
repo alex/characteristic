@@ -136,7 +136,10 @@ def init(self, {args_with_defaults}):
 ))
     ns = {"defaults": defaults}
     locs = {}
-    exec(source, ns, locs)
+    try:
+        exec(source, ns, locs)
+    except SyntaxError as e:
+        raise SyntaxError(source)
     init = locs["init"]
     return _make_wrap_init(init)
 
