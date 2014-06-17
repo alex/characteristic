@@ -118,14 +118,14 @@ def with_init(attrs, defaults=None):
         defaults = {}
 
     source = textwrap.dedent("""
-    def init(self, {args_with_defaults}):
-        {assignments}
-        self.__original_init__({args})
-    """.format(
-        args_with_defaults=", ".join("{attr}=defaults[{attr}]".format(attr=attr) if attr in defaults else "attr" for attr in attrs),
-        args=", ".join(attrs),
-        assignments="\n    ".join("self.{attr} = {attr}".format(attr=attr) for attr in attrs)
-    ))
+def init(self, {args_with_defaults}):
+    {assignments}
+    self.__original_init__({args})
+""".format(
+    args_with_defaults=", ".join("{attr}=defaults[{attr}]".format(attr=attr) if attr in defaults else "attr" for attr in attrs),
+    args=", ".join(attrs),
+    assignments="\n    ".join("self.{attr} = {attr}".format(attr=attr) for attr in attrs)
+))
     ns = {"defaults": defaults}
     locs = {}
     exec(source, ns, locs)
