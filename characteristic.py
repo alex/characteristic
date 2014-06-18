@@ -130,15 +130,15 @@ def init(self, {args_with_defaults}):
     {assignments}
     self.__original_init__({args})
 """.format(
-    args_with_defaults=", ".join("{attr}=defaults[{attr}]".format(attr=attr) if attr in defaults else "attr" for attr in attrs),
+    args_with_defaults=", ".join(["{attr}=defaults[{attr}]".format(attr=attr) if attr in defaults else attr for attr in attrs]),
     args=", ".join(attrs),
-    assignments="\n    ".join("self.{attr} = {attr}".format(attr=attr) for attr in attrs)
+    assignments="\n    ".join(["self.{attr} = {attr}".format(attr=attr) for attr in attrs])
 ))
     ns = {"defaults": defaults}
     locs = {}
     try:
         exec(source, ns, locs)
-    except SyntaxError as e:
+    except SyntaxError:
         raise SyntaxError(source)
     init = locs["init"]
     return _make_wrap_init(init)
